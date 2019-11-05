@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ToDoList—最简单的待办事项列表</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="./vue.js"></script>
+</head>
+<body>
+<div id="app">
+  <header>
+      <section>
+          <label for="title">ToDoList</label>
+          <input type="text" name="title" placeholder="添加ToDo" required="required" autocomplete="off" v-model="newEvent" @keyup.enter="add" />
+      </section>
+  </header>
+  <section>
+      <h2>正在进行 <span>{{num1}}</span></h2>
+      <ol>
+          <li v-for="item in searchDont(todolist)" :key="item.id">
+            <input type='checkbox' checked='checked' @click="change(item.id)">
+            <p>{{item.title}}</p>
+            <a href='javascrip:;' @click.prevent="del(item.id)">-</a>
+          </li>
+      </ol>
+      <h2>已经完成 <span>{{num2}}</span></h2>
+      <ul>
+          <li v-for="item in searchDone(todolist)" :key="item.id">
+            <input type='checkbox' checked='checked' @click="change(item.id)">
+            <p>{{item.title}}</p>
+            <a href='javascrip:;' @click.prevent="del(item.id)">-</a>
+          </li>
+      </ul>
+  </section>
+  <footer>
+      Copyright &copy; 2019 todolist.cn <a href="javascript:clear();">clear</a>
+  </footer>
+</div>
+<script>
+  var vm = new Vue({
+    el:"#app",
+    data:{
+      newEvent:"",
+      todolist:[],
+      num1: 0,
+      num2: 0
+    },
+    mounted() {
+      this.count();
+    },
+    methods: {
+      getData(){ //获取本地localStorage数据
+        var data = localStorage.getItem('todolistVue');
+        if(data !== null){
+          this.todolist =  JSON.parse(data);
+        }else{
+          this.todolist = [];
+        }
+      },
+      saveData(list){ //保存数据至本地中的todolistVue
+        localStorage.setItem('todolistVue',JSON.stringify(list));
+      },
+      count(){  //获取数据，并统计事件总数函数
+        this.getData();
+        this.num1 = 0; //初始化未完成事件
+        this.num2 = 0; //初始化已完成时间
+        this.todolist.forEach(ele => { //通过forEach循环遍历数据
+          if(!ele.done){
+            this.num1++;
+          }else{
+            this.num2++;
+          }
+        });
+      },
+      del(id){ //a标签删除函数
+        var index = this.todolist.findIndex(item => { //通过id查找该事件数据在todolist数组中的索引
+          if(id == item.id)
+            return true;
+        })
+        this.todolist.splice(index,1); //通过索引删除
+        this.saveData(this.todolist);
+        this.count();
+      },
+      add(){ //添加事件函数（自动生成id）
+        if(this.todolist != ""){ //如果本地数据不为空，保存当前最大的id号
+          var id = this.todolist[0].id;
+        }else{ //如果本地数据为空，初始化id为0；
+          var id = -1; 
+        }
+        this.todolist.unshift({id:++id,title:this.newEvent,done:false}); //使用unshift永远将id最大的新数据放置数组首位
+        this.saveData(this.todolist);
+        this.newEvent = "";
+        this.count();
+      },
+      change(id){ //改变事件状态
+        var index = this.todolist.findIndex(item => { //通过id查找该事件数据在todolist数组中的索引
+          if(id == item.id)
+            return true;
+        });
+        this.todolist[index].done = !this.todolist[index].done; //通过索引修改该事件的done值
+        this.saveData(this.todolist);
+        this.count();
+      },
+      searchDone(list){ //过滤已完成的事件
+        var doneList = [];
+        this.todolist.forEach(ele =>{ //通过forEach循环将已完成的事件储存到doneList中
+          if(ele.done){
+            doneList.push(ele);
+          }
+        })
+        return doneList;
+      },
+      searchDont(list){ //过滤出未完成的事件
+        var dontList = [];
+        this.todolist.forEach(ele =>{ //通过forEach循环将未完成的事件储存到dontList中
+          if(!ele.done){
+            dontList.push(ele);
+          }
+        })
+        return dontList;
+      }
+    }
+  })
+</script>
+</body>
+</html>
