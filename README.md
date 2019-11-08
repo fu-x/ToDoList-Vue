@@ -1,4 +1,4 @@
-# 基于Vue的tudolist———最简单的代办事件列表
+# 基于Vue的todolist———最简单的代办事件列表
 
 ## Vue-toDolist分析：
 1. 做到刷新页面不会丢失数据，因此我们的数据需要保存至本地localstorage里。
